@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreAppAngle", "CoreAppAngle.vcxproj", "{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
+		Release|ARM64 = Release|ARM64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Debug|ARM64.Build.0 = Debug|ARM64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Debug|x64.ActiveCfg = Debug|x64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Debug|x64.Build.0 = Debug|x64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Debug|x64.Deploy.0 = Debug|x64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Release|ARM64.ActiveCfg = Release|ARM64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Release|ARM64.Build.0 = Release|ARM64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Release|ARM64.Deploy.0 = Release|ARM64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Release|x64.ActiveCfg = Release|x64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Release|x64.Build.0 = Release|x64
+		{97DE3BE8-8E56-4B5F-AFC2-8CF6F3EF901B}.Release|x64.Deploy.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {07DD87A9-E9E2-4F3E-BAA4-8A0E3D107456}
+	EndGlobalSection
+EndGlobal
