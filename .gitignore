@@ -2,3 +2,6 @@
 Generated Files/
 packages/
 x64/
+*.obj
+*.exe
+*.dll

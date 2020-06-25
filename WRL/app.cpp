@@ -1,18 +1,19 @@
 /*
 A UWP app built directly against the WRL library.
 
-For WRL details, see https://docs.microsoft.com/en-us/cpp/cppcx/wrl/wrl-reference
-
-Largely influenced by https://docs.microsoft.com/en-us/archive/msdn-magazine/2013/august/windows-with-c-the-windows-runtime-application-model
-Useful reference code at https://github.com/Medium/phantomjs-1/blob/master/src/qt/qtbase/src/winmain/qtmain_winrt.cpp
+For WRL details  https://docs.microsoft.com/en-us/cpp/cppcx/wrl/wrl-reference
+Code structure   https://docs.microsoft.com/en-us/archive/msdn-magazine/2013/august/windows-with-c-the-windows-runtime-application-model
+Useful reference https://github.com/Medium/phantomjs-1/blob/master/src/qt/qtbase/src/winmain/qtmain_winrt.cpp
 See also code at https://hg.mozilla.org/mozilla-central/rev/5f0882ee58c0
-
-Build with:
-
-cl.exe app.cpp /std:c++17 /EHsc /Od /MDd /D "WINAPI_FAMILY=WINAPI_FAMILY_APP" /D "_DEBUG" /link /SUBSYSTEM:WINDOWS /APPCONTAINER
-
 */
+
+#if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY != WINAPI_FAMILY_APP)
+#error This app is should be compiled as a Windows Universal app
+#endif
+
 #include <assert.h>
+#include <memory>
+
 #include <Windows.h>
 
 #include <wrl.h>
@@ -21,8 +22,7 @@ cl.exe app.cpp /std:c++17 /EHsc /Od /MDd /D "WINAPI_FAMILY=WINAPI_FAMILY_APP" /D
 #include <Windows.ApplicationModel.Core.h>
 #include <Windows.ApplicationModel.Activation.h>
 
-#pragma comment(lib, "windowsapp.lib")
-#pragma comment(lib, "runtimeobject.lib")
+#include "SimpleRenderer.h"
 
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
@@ -30,6 +30,8 @@ using namespace ABI::Windows::Foundation;
 using namespace ABI::Windows::ApplicationModel::Core;
 using namespace ABI::Windows::ApplicationModel::Activation;
 using namespace ABI::Windows::UI::Core;
+
+using namespace CoreAppAngle;
 
 typedef ITypedEventHandler<CoreApplicationView*, IActivatedEventArgs*> ActivatedEventHandler;
 
@@ -73,6 +75,15 @@ class MyApp : public RuntimeClass<IFrameworkView, IFrameworkViewSource>
   private:
     ICoreWindow* m_coreWindow;
     EventRegistrationToken m_token;
+
+    bool mWindowClosed;
+    bool mWindowVisible;
+
+    EGLDisplay mEglDisplay;
+    EGLContext mEglContext;
+    EGLSurface mEglSurface;
+
+    std::unique_ptr<SimpleRenderer> mCubeRenderer;
 };
 
 int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
