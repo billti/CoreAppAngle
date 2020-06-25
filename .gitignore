@@ -2,6 +2,9 @@
 Generated Files/
 packages/
 x64/
+WRL/appx/
 *.obj
 *.exe
 *.dll
+*.ilk
+*.pdb

@@ -303,7 +303,6 @@ private:
     }
 
     // Create a PropertySet and initialize with the EGLNativeWindowType.
-
     HRESULT result = S_OK;
     ComPtr<IPropertySet> propertySet;
     ComPtr<IActivationFactory> propertySetFactory;
@@ -326,19 +325,13 @@ private:
     {
       throw std::exception("Failed to create a map from the PropertySet");
     }
-    HString eglSizeProp;
-    eglSizeProp.Set(EGLRenderSurfaceSizeProperty);
+    HString eglWinTypeProp;
+    result = eglWinTypeProp.Set(EGLNativeWindowTypeProperty);
     boolean replaced = false;
-    propMap->Insert(eglSizeProp.Get(), window, &replaced);
 
-    // ComPtr<PropertySet>  surfaceCreationProperties = Make<PropertySet>();
-    // PropertySet surfaceCreationProperties;
-    // surfaceCreationProperties->
-    // surfaceCreationProperties.Insert(EGLNativeWindowTypeProperty, window);
+    IInspectable* winInspectable = static_cast<IInspectable*>(window);
+    result = propMap->Insert(eglWinTypeProp.Get(), winInspectable, &replaced);
 
-    // You can configure the surface to render at a lower resolution and be scaled up to
-    // the full window size. This scaling is often free on mobile hardware.
-    //
     // One way to configure the SwapChainPanel is to specify precisely which resolution it should render at.
     // Size customRenderSurfaceSize = Size(800, 600);
     // surfaceCreationProperties->Insert(ref new String(EGLRenderSurfaceSizeProperty), PropertyValue::CreateSize(customRenderSurfaceSize));
@@ -347,10 +340,9 @@ private:
     // e.g. if the SwapChainPanel is 1920x1280 then setting a factor of 0.5f will make the app render at 960x640
     // float customResolutionScale = 0.5f;
     // surfaceCreationProperties->Insert(ref new String(EGLRenderResolutionScaleProperty), PropertyValue::CreateSingle(customResolutionScale));
+    ComPtr<IInspectable> propInspectable{propMap};
+    mEglSurface = eglCreateWindowSurface(mEglDisplay, config, propInspectable.Get(), surfaceAttributes);
 
-    // EGLNativeWindowType win = static_cast<EGLNativeWindowType>(winrt::get_abi(surfaceCreationProperties));
-    EGLNativeWindowType win = propertySet.Get();
-    mEglSurface = eglCreateWindowSurface(mEglDisplay, config, win, surfaceAttributes);
     if (mEglSurface == EGL_NO_SURFACE)
     {
       throw std::exception("eglCreateWindowSurface failed");
