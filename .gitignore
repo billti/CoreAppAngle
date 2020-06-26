@@ -8,3 +8,4 @@ WRL/appx/
 *.dll
 *.ilk
 *.pdb
+*.appx

@@ -196,51 +196,13 @@ private:
 #if defined(EGL_ANGLE_DISPLAY_ALLOW_RENDER_TO_BACK_BUFFER)
       // EGL_ANGLE_DISPLAY_ALLOW_RENDER_TO_BACK_BUFFER is an optimization that can have large performance benefits on mobile devices.
       // Its syntax is subject to change, though. Please update your Visual Studio templates if you experience compilation issues with it.
-      EGL_ANGLE_DISPLAY_ALLOW_RENDER_TO_BACK_BUFFER,
-      EGL_TRUE,
+      EGL_ANGLE_DISPLAY_ALLOW_RENDER_TO_BACK_BUFFER, EGL_TRUE,
 #endif
 
       // EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE is an option that enables ANGLE to automatically call
       // the IDXGIDevice3::Trim method on behalf of the application when it gets suspended.
       // Calling IDXGIDevice3::Trim when an application is suspended is a Windows Store application certification requirement.
-      EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE,
-      EGL_TRUE,
-      EGL_NONE,
-    };
-
-    const EGLint fl9_3DisplayAttributes[] =
-    {
-      // These can be used to request ANGLE's D3D11 renderer, with D3D11 Feature Level 9_3.
-      // These attributes are used if the call to eglInitialize fails with the default display attributes.
-      EGL_PLATFORM_ANGLE_TYPE_ANGLE,
-      EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
-      EGL_PLATFORM_ANGLE_MAX_VERSION_MAJOR_ANGLE,
-      9,
-      EGL_PLATFORM_ANGLE_MAX_VERSION_MINOR_ANGLE,
-      3,
-#if defined(EGL_ANGLE_DISPLAY_ALLOW_RENDER_TO_BACK_BUFFER)
-      EGL_ANGLE_DISPLAY_ALLOW_RENDER_TO_BACK_BUFFER,
-      EGL_TRUE,
-#endif
-      EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE,
-      EGL_TRUE,
-      EGL_NONE,
-    };
-
-    const EGLint warpDisplayAttributes[] =
-    {
-      // These attributes can be used to request D3D11 WARP.
-      // They are used if eglInitialize fails with both the default display attributes and the 9_3 display attributes.
-      EGL_PLATFORM_ANGLE_TYPE_ANGLE,
-      EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
-      EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE,
-      EGL_PLATFORM_ANGLE_DEVICE_TYPE_D3D_WARP_ANGLE,
-#if defined(EGL_ANGLE_DISPLAY_ALLOW_RENDER_TO_BACK_BUFFER)
-      EGL_ANGLE_DISPLAY_ALLOW_RENDER_TO_BACK_BUFFER,
-      EGL_TRUE,
-#endif
-      EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE,
-      EGL_TRUE,
+      EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE, EGL_TRUE,
       EGL_NONE,
     };
 
@@ -272,28 +234,7 @@ private:
 
     if (eglInitialize(mEglDisplay, NULL, NULL) == EGL_FALSE)
     {
-      // This tries to initialize EGL to D3D11 Feature Level 9_3, if 10_0+ is unavailable (e.g. on some mobile devices).
-      mEglDisplay = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, EGL_DEFAULT_DISPLAY, fl9_3DisplayAttributes);
-      if (mEglDisplay == EGL_NO_DISPLAY)
-      {
-        throw std::exception("eglGetPlatformDisplayETX returned EGL_NO_DISPLAY");
-      }
-
-      if (eglInitialize(mEglDisplay, NULL, NULL) == EGL_FALSE)
-      {
-        // This initializes EGL to D3D11 Feature Level 11_0 on WARP, if 9_3+ is unavailable on the default GPU.
-        mEglDisplay = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, EGL_DEFAULT_DISPLAY, warpDisplayAttributes);
-        if (mEglDisplay == EGL_NO_DISPLAY)
-        {
-          throw std::exception("eglGetPlatformDisplayETX returned EGL_NO_DISPLAY");
-        }
-
-        if (eglInitialize(mEglDisplay, NULL, NULL) == EGL_FALSE)
-        {
-          // If all of the calls to eglInitialize returned EGL_FALSE then an error has occurred.
           throw std::exception("eglInitialize failed");
-        }
-      }
     }
 
     EGLint numConfigs = 0;
