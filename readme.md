@@ -23,10 +23,18 @@ _(TODO: Build fails if `is_clang` is not set. However appears to force MSVC to b
 targeting UWP, and tries to use "CL.exe" with the wrong defaults. Figure this out
 and either log a bug or fix it.)_
 
-Once ANGLE is build, this project may be opened in VS 2019 and built. After building,
-copy the below 3 files to the `x64\Debug\CoreAppAngle\AppX` directory before deploying.
+## C++ with WRL
+This repo then has two projects. The one in the .\WRL directory can be built from
+the command line with MSVC or Clang, and only uses the WRL libraries, not C++/WinRT
+or C++/CX. This would work in most other environments the easiest. To use, just
+CD into the WRL directory and run `build` or `build clang` followed by `build pack`.
+This last step will also register the built AppX on your machine to run.
 
-- libEDL.dll
+## C++/WinRT
+The project in the root of the repo is a C++/WinRT Visual Studio 2019 project. After
+building, copy the below 3 files to the `x64\Debug\CoreAppAngle\AppX` directory before deploying.
+
+- libEGL.dll
 - libGLESv2.dll
 - zlib.dll
 
