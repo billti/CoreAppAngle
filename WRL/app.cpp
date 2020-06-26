@@ -50,6 +50,10 @@ typedef ITypedEventHandler<CoreApplicationView *, IActivatedEventArgs *> Activat
 typedef ITypedEventHandler<CoreWindow *, VisibilityChangedEventArgs *> VisibilityChangedEventHandler;
 typedef ITypedEventHandler<CoreWindow *, CoreWindowEventArgs *> ClosedEventHandler;
 
+inline void CheckHR(HRESULT hr, char const *msg) {
+  if (FAILED(hr)) throw std::exception(msg);
+}
+
 class MyApp : public RuntimeClass<IFrameworkView, IFrameworkViewSource>
 {
 public:
@@ -71,28 +75,28 @@ public:
   {
     return applicationView->add_Activated(
         Callback<ActivatedEventHandler>([this](ICoreApplicationView *, IActivatedEventArgs *) {
-          return this->m_coreWindow->Activate();
+          return this->mCoreWindow->Activate();
         }).Get(),
-        &m_token);
+        &mActivatedToken);
   }
 
   STDMETHODIMP SetWindow(ICoreWindow *window)
   {
-    m_coreWindow = window;
+    mCoreWindow = window;
 
     window->add_VisibilityChanged(
         Callback<VisibilityChangedEventHandler>([this](ICoreWindow *window, IVisibilityChangedEventArgs *args) {
           args->get_Visible(&this->mWindowVisible);
           return S_OK;
         }).Get(),
-        &m_visibilityChangedToken);
+        &mVisibilityChangedToken);
 
     window->add_Closed(
         Callback<ClosedEventHandler>([this](ICoreWindow *window, ICoreWindowEventArgs *args) {
           this->mWindowClosed = true;
           return S_OK;
         }).Get(),
-        &m_closedToken);
+        &mClosedToken);
 
     InitializeEGL(window);
 
@@ -108,9 +112,7 @@ public:
   STDMETHODIMP Run(void)
   {
     ComPtr<ICoreDispatcher> coreDispatcher;
-    HRESULT hr = m_coreWindow->get_Dispatcher(coreDispatcher.GetAddressOf());
-    if (FAILED(hr))
-      return hr;
+    CheckHR(mCoreWindow->get_Dispatcher(coreDispatcher.GetAddressOf()), "Failed to get dispatcher");
 
     while (!mWindowClosed)
     {
@@ -134,7 +136,7 @@ public:
           mCubeRenderer.reset(nullptr);
           CleanupEGL();
 
-          InitializeEGL(m_coreWindow);
+          InitializeEGL(mCoreWindow);
           RecreateRenderer();
         }
       }
@@ -244,34 +246,18 @@ private:
     }
 
     // Create a PropertySet and initialize with the EGLNativeWindowType.
-    HRESULT result = S_OK;
     ComPtr<IPropertySet> propertySet;
     ComPtr<IActivationFactory> propertySetFactory;
-    result = GetActivationFactory(
-        HStringReference(RuntimeClass_Windows_Foundation_Collections_PropertySet).Get(),
-        &propertySetFactory);
-    if (FAILED(result))
-    {
-      throw std::exception("Failed to get the PropertySet factory");
-    }
+    CheckHR(GetActivationFactory(
+        HStringReference(RuntimeClass_Windows_Foundation_Collections_PropertySet).Get(), &propertySetFactory),
+        "Failed to get the PropertySet factory");
 
-    result = propertySetFactory->ActivateInstance(&propertySet);
-    if (FAILED(result))
-    {
-      throw std::exception("Failed to create a PropertySet instance");
-    }
     ComPtr<IMap<HSTRING, IInspectable *>> propMap;
-    result = propertySet.As(&propMap);
-    if (FAILED(result))
-    {
-      throw std::exception("Failed to create a map from the PropertySet");
-    }
-    HString eglWinTypeProp;
-    result = eglWinTypeProp.Set(EGLNativeWindowTypeProperty);
+    HStringReference eglWinTypeProp{EGLNativeWindowTypeProperty};
     boolean replaced = false;
-
-    IInspectable* winInspectable = static_cast<IInspectable*>(window);
-    result = propMap->Insert(eglWinTypeProp.Get(), winInspectable, &replaced);
+    CheckHR(propertySetFactory->ActivateInstance(&propertySet),"Failed to create a PropertySet instance");
+    CheckHR(propertySet.As(&propMap), "Failed to create a map from the PropertySet");
+    CheckHR(propMap->Insert(eglWinTypeProp.Get(), static_cast<IInspectable*>(window), &replaced), "Failed to insert to PropertySet");
 
     // One way to configure the SwapChainPanel is to specify precisely which resolution it should render at.
     // Size customRenderSurfaceSize = Size(800, 600);
@@ -322,10 +308,10 @@ private:
     }
   }
 
-  ICoreWindow *m_coreWindow;
-  EventRegistrationToken m_token;
-  EventRegistrationToken m_visibilityChangedToken;
-  EventRegistrationToken m_closedToken;
+  ICoreWindow *mCoreWindow;
+  EventRegistrationToken mActivatedToken;
+  EventRegistrationToken mVisibilityChangedToken;
+  EventRegistrationToken mClosedToken;
 
   bool mWindowClosed;
   boolean mWindowVisible;
@@ -339,18 +325,14 @@ private:
 
 int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 {
-  HRESULT hr = RoInitialize(RO_INIT_MULTITHREADED);
-  if (FAILED(hr))
-    return -1;
-
+  CheckHR(RoInitialize(RO_INIT_MULTITHREADED), "Failed to initialize COM");
   ComPtr<IFrameworkViewSource> myApp = Make<MyApp>();
 
   ComPtr<ICoreApplication> coreApp;
-  HString coreAppName;
-  coreAppName.Set(RuntimeClass_Windows_ApplicationModel_Core_CoreApplication);
-  hr = RoGetActivationFactory(coreAppName.Get(), __uuidof(ICoreApplication), reinterpret_cast<void **>(coreApp.GetAddressOf()));
-  if (FAILED(hr))
-    return -2;
+  HStringReference coreAppName{RuntimeClass_Windows_ApplicationModel_Core_CoreApplication};
+  CheckHR(
+    RoGetActivationFactory(coreAppName.Get(), __uuidof(ICoreApplication), reinterpret_cast<void **>(coreApp.GetAddressOf())),
+    "Failed to get CoreApplication factory");
 
   coreApp->Run(myApp.Get());
 
