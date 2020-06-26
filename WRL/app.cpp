@@ -247,17 +247,14 @@ private:
 
     // Create a PropertySet and initialize with the EGLNativeWindowType.
     ComPtr<IPropertySet> propertySet;
-    ComPtr<IActivationFactory> propertySetFactory;
-    CheckHR(GetActivationFactory(
-        HStringReference(RuntimeClass_Windows_Foundation_Collections_PropertySet).Get(), &propertySetFactory),
-        "Failed to get the PropertySet factory");
-
     ComPtr<IMap<HSTRING, IInspectable *>> propMap;
-    HStringReference eglWinTypeProp{EGLNativeWindowTypeProperty};
     boolean replaced = false;
-    CheckHR(propertySetFactory->ActivateInstance(&propertySet),"Failed to create a PropertySet instance");
-    CheckHR(propertySet.As(&propMap), "Failed to create a map from the PropertySet");
-    CheckHR(propMap->Insert(eglWinTypeProp.Get(), static_cast<IInspectable*>(window), &replaced), "Failed to insert to PropertySet");
+
+    CheckHR(ActivateInstance(HStringReference(RuntimeClass_Windows_Foundation_Collections_PropertySet).Get(), &propertySet),
+        "Failed to create a PropertySet");
+    CheckHR(propertySet.As(&propMap), "Failed to convert PropertySet to an IMap");
+    CheckHR(propMap->Insert(HStringReference(EGLNativeWindowTypeProperty).Get(), static_cast<IInspectable*>(window), &replaced),
+        "Failed to insert to PropertySet");
 
     // One way to configure the SwapChainPanel is to specify precisely which resolution it should render at.
     // Size customRenderSurfaceSize = Size(800, 600);
@@ -267,8 +264,7 @@ private:
     // e.g. if the SwapChainPanel is 1920x1280 then setting a factor of 0.5f will make the app render at 960x640
     // float customResolutionScale = 0.5f;
     // surfaceCreationProperties->Insert(ref new String(EGLRenderResolutionScaleProperty), PropertyValue::CreateSingle(customResolutionScale));
-    ComPtr<IInspectable> propInspectable{propMap};
-    mEglSurface = eglCreateWindowSurface(mEglDisplay, config, propInspectable.Get(), surfaceAttributes);
+    mEglSurface = eglCreateWindowSurface(mEglDisplay, config, static_cast<IInspectable*>(propMap.Get()), surfaceAttributes);
 
     if (mEglSurface == EGL_NO_SURFACE)
     {
